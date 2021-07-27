@@ -41,7 +41,9 @@ for filename in os.listdir(directory):
 print('Unzipping Done!')
 
 with open(csv_file, mode='w') as write_file:
-    fieldnames = ['FileName', 'Memo', 'Pattern', 'Qr_Position', 'Qr_Content', 'Ar_Corner', 'Laser_move', 'Start_Time', 'Qr_Time', 'Ar_Time', 'Total_Time']
+    fieldnames = ['FileName', 'Memo', 'Pattern', 'Qr_Position', 'Qr_Content', 
+                    'Ar_Corner', 'Laser_move', 'Start_Time', 'Qr_Time', 'Ar_Time', 
+                    'Total_Time', 'Laser_off_X', 'Laser_off_Y','Class']
     writer = csv.DictWriter(write_file, fieldnames=fieldnames)
     writer.writeheader()
 
@@ -115,9 +117,15 @@ with open(csv_file, mode='w') as write_file:
         Js_Report = pop_data['Report']
         Js_Illegal = pop_data['Illegal']
 
-        if (Js_Report['try'] == True):
+        if (pop_data['QR'] == {}):
+            writer.writerow({
+                            'FileName' : dir_name, 
+                            'Memo' : memo,
+                            'Class' : 'D'
+                            })
+
+        elif (pop_data['Approach'][0] == {}):
             Js_Qr = pop_data['QR']['0']
-            Js_Ar = pop_data['Approach'][0]['0']
             Js_Time = pop_data['Mission Time']
 
             writer.writerow({
@@ -129,14 +137,62 @@ with open(csv_file, mode='w') as write_file:
                             'Ar_Corner' : ArContent, 
                             'Laser_move' : Laser_move, 
                             'Qr_Time' : ((fn_str_time(Js_Qr['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
-                            'Ar_Time' : ((fn_str_time(Js_Ar['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
-                            'Total_Time': ((fn_str_time(Js_Time['finish']) - fn_str_time(Js_Time['start'])) / 1e5)
+                            'Class' : 'C'
                             })
 
         else:
-            writer.writerow({
+            Js_Qr = pop_data['QR']['0']
+            Js_Ar = pop_data['Approach'][0]['0']
+            Js_Time = pop_data['Mission Time']
+
+            if (len(Js_Time) == 1):
+                writer.writerow({
                             'FileName' : dir_name, 
                             'Memo' : memo,
+                            'Pattern' : get_pattern, 
+                            'Qr_Position' : PosQR, 
+                            'Qr_Content' : QrContent, 
+                            'Ar_Corner' : ArContent, 
+                            'Laser_move' : Laser_move, 
+                            'Qr_Time' : ((fn_str_time(Js_Qr['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
+                            'Ar_Time' : ((fn_str_time(Js_Ar['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
+                            'Laser_off_X' : Js_Ar['x'],
+                            'Laser_off_Y' : Js_Ar['y'],
+                            'Class' : 'B'
                             })
+
+            elif (not Js_Ar['direction']):
+                writer.writerow({
+                            'FileName' : dir_name, 
+                            'Memo' : memo,
+                            'Pattern' : get_pattern, 
+                            'Qr_Position' : PosQR, 
+                            'Qr_Content' : QrContent, 
+                            'Ar_Corner' : ArContent, 
+                            'Laser_move' : Laser_move, 
+                            'Qr_Time' : ((fn_str_time(Js_Qr['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
+                            'Ar_Time' : ((fn_str_time(Js_Ar['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
+                            'Total_Time': ((fn_str_time(Js_Time['finish']) - fn_str_time(Js_Time['start'])) / 1e5),
+                            'Laser_off_X' : Js_Ar['x'],
+                            'Laser_off_Y' : Js_Ar['y'],
+                            'Class' : 'B'
+                            })
+
+            else:
+                writer.writerow({
+                                'FileName' : dir_name, 
+                                'Memo' : memo,
+                                'Pattern' : get_pattern, 
+                                'Qr_Position' : PosQR, 
+                                'Qr_Content' : QrContent, 
+                                'Ar_Corner' : ArContent, 
+                                'Laser_move' : Laser_move, 
+                                'Qr_Time' : ((fn_str_time(Js_Qr['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
+                                'Ar_Time' : ((fn_str_time(Js_Ar['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
+                                'Total_Time': ((fn_str_time(Js_Time['finish']) - fn_str_time(Js_Time['start'])) / 1e5),
+                                'Laser_off_X' : Js_Ar['x'],
+                                'Laser_off_Y' : Js_Ar['y'],
+                                'Class' : 'A'
+                                })
 
 print(f"All DONE! Everything save at {csv_file}")
