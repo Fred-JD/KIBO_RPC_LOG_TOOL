@@ -6,7 +6,7 @@ import csv
 import json
 from datetime import datetime
 
-directory = "KIBO_RPC_Log_File"
+directory = "File"
 Extract_to = "Unzip"
 log_file = "adb.log"
 json_file = "result.json"
@@ -32,13 +32,13 @@ for filename in os.listdir(directory):
 
         # printing all the contents of the zip file 
         print("Extracting " + filename)
-        zip.printdir()
+        # zip.printdir()
 
         unzipped = os.path.isdir(extract_dir)
         if (unzipped == False):
             os.mkdir(extract_dir)
             zip.extractall(extract_dir)
-            print('Unzipping Done!')
+print('Unzipping Done!')
 
 with open(csv_file, mode='w') as write_file:
     fieldnames = ['FileName', 'Memo', 'Pattern', 'Qr_Position', 'Qr_Content', 'Ar_Corner', 'Laser_move', 'Start_Time', 'Qr_Time', 'Ar_Time', 'Total_Time']
@@ -114,22 +114,29 @@ with open(csv_file, mode='w') as write_file:
 
         Js_Report = pop_data['Report']
         Js_Illegal = pop_data['Illegal']
-        Js_Qr = pop_data['QR']['0']
-        Js_Ar = pop_data['Approach'][0]['0']
-        Js_Time = pop_data['Mission Time']
-        
-        print((fn_str_time(Js_Time['finish']) - fn_str_time(Js_Time['start'])) / 1e5)
 
-        writer.writerow({
-                        'FileName' : dir_name, 
-                        'Memo' : memo,
-                        'Pattern' : get_pattern, 
-                        'Qr_Position' : PosQR, 
-                        'Qr_Content' : QrContent, 
-                        'Ar_Corner' : ArContent, 
-                        'Laser_move' : Laser_move, 
-                        'Qr_Time' : ((fn_str_time(Js_Qr['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
-                        'Ar_Time' : ((fn_str_time(Js_Ar['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
-                        'Total_Time': ((fn_str_time(Js_Time['finish']) - fn_str_time(Js_Time['start'])) / 1e5)
-                        })
+        if (Js_Report['try'] == True):
+            Js_Qr = pop_data['QR']['0']
+            Js_Ar = pop_data['Approach'][0]['0']
+            Js_Time = pop_data['Mission Time']
 
+            writer.writerow({
+                            'FileName' : dir_name, 
+                            'Memo' : memo,
+                            'Pattern' : get_pattern, 
+                            'Qr_Position' : PosQR, 
+                            'Qr_Content' : QrContent, 
+                            'Ar_Corner' : ArContent, 
+                            'Laser_move' : Laser_move, 
+                            'Qr_Time' : ((fn_str_time(Js_Qr['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
+                            'Ar_Time' : ((fn_str_time(Js_Ar['timestamp']) - fn_str_time(Js_Time['start'])) / 1e5), 
+                            'Total_Time': ((fn_str_time(Js_Time['finish']) - fn_str_time(Js_Time['start'])) / 1e5)
+                            })
+
+        else:
+            writer.writerow({
+                            'FileName' : dir_name, 
+                            'Memo' : memo,
+                            })
+
+print(f"All DONE! Everything save at {csv_file}")
