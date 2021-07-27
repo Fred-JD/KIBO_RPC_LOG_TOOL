@@ -6,7 +6,7 @@ import csv
 import json
 from datetime import datetime
 
-directory = "File"
+directory = "KIBO_RPC_Log_File"
 Extract_to = "Unzip"
 log_file = "adb.log"
 json_file = "result.json"
